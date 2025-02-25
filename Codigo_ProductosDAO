@@ -1,0 +1,152 @@
+
+package Controlador;
+
+import Modelo.Productos;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+public class ProductosDAO {
+    
+        //AGREGAR PRODUCTOS
+    
+    public String adicionarProductos(Productos miproductos){
+        
+        String miRespuesta = "";
+        Conexion miConexion = new Conexion();
+        Connection nuevaCon = miConexion.getConn();
+        
+        if(nuevaCon == null) {
+            return "Error de conexión";
+        }
+        
+        PreparedStatement sentencia = null;
+        try{
+            String Query = "INSERT INTO Productos(categoria) VALUES(?);";
+            
+            sentencia = nuevaCon.prepareStatement(Query);
+            sentencia.setString(1, miproductos.getCategoria());
+            sentencia.executeUpdate();
+            
+        }catch(Exception ex){
+            miRespuesta = ex.getMessage();
+            System.out.println("Ocurrio un error en ProductosDAO "+ ex.getMessage());
+        } finally{
+            try{
+                if (sentencia != null) sentencia.close();
+                if (nuevaCon != null) nuevaCon.close();
+            }catch(Exception e) {
+                System.out.println("Error cerrando recursos " + e.getMessage());
+            }
+        } 
+        
+    return miRespuesta;
+        
+    }
+            //CONSULTAR PRODUCTOS
+    
+    public Productos consultarProductos(int idProductos) {
+    Productos producto = null;       
+    Conexion miConexion = new Conexion();
+    Connection nuevaCon = miConexion.getConn();  
+    PreparedStatement sentencia = null;
+    ResultSet rs = null;
+    
+    try {
+        String QuerySQL = "SELECT idProductos, nombre FROM Productos WHERE idProductos = ?";
+        sentencia = nuevaCon.prepareStatement(QuerySQL);
+        sentencia.setInt(1, idProductos);
+        rs = sentencia.executeQuery();
+        
+        if (rs.next()) {
+            producto = new Productos();
+            producto.setIdProductos(rs.getInt("idProductos"));
+            producto.setNombre(rs.getString("nombre"));
+        }
+    } catch (Exception ex) {
+        System.err.println("Error en consultarProductos: " + ex.getMessage());
+    } finally {
+        try {
+            if (rs != null) rs.close();
+            if (sentencia != null) sentencia.close();
+            if (nuevaCon != null) nuevaCon.close();
+        } catch (Exception e) {
+            System.out.println("Error cerrando recursos: " + e.getMessage());
+        }
+    }
+    return producto;
+}
+
+            //ACTUALIZAR PRODUCTOS
+    
+    public String actualizarProducto(Productos miproductos) {
+    String miRespuesta = "";
+    Conexion miConexion = new Conexion();
+    Connection nuevaCon = miConexion.getConn();
+
+    if (nuevaCon == null) {
+        return "Error de conexión";
+    }
+
+    PreparedStatement sentencia = null;
+    try {
+        String Query = "UPDATE Productos SET categoria = ?, nombre = ? WHERE idProductos = ?";
+        sentencia = nuevaCon.prepareStatement(Query);
+        sentencia.setString(1, miproductos.getCategoria());
+        sentencia.setString(2, miproductos.getNombre());
+        sentencia.setInt(3, miproductos.getIdProductos());
+
+        int filasAfectadas = sentencia.executeUpdate();
+        if (filasAfectadas == 0) {
+            miRespuesta = "No se encontró el producto";
+        }
+    } catch (Exception ex) {
+        miRespuesta = ex.getMessage();
+        System.out.println("Ocurrió un error en actualizarProducto: " + ex.getMessage());
+    } finally {
+        try {
+            if (sentencia != null) sentencia.close();
+            if (nuevaCon != null) nuevaCon.close();
+        } catch (Exception e) {
+            System.out.println("Error cerrando recursos: " + e.getMessage());
+        }
+    }
+    return miRespuesta;
+}
+            //ELIMINAR PRODUCTOS
+    
+    public String eliminarProducto(int idProducto) {
+    String miRespuesta = "";
+    Conexion miConexion = new Conexion();
+    Connection nuevaCon = miConexion.getConn();
+
+    if (nuevaCon == null) {
+        return "Error de conexión";
+    }
+
+    PreparedStatement sentencia = null;
+    try {
+        String Query = "DELETE FROM Productos WHERE idProductos = ?";
+        sentencia = nuevaCon.prepareStatement(Query);
+        sentencia.setInt(1, idProducto);
+
+        int filasAfectadas = sentencia.executeUpdate();
+        if (filasAfectadas == 0) {
+            miRespuesta = "No se encontró el producto";
+        }
+    } catch (Exception ex) {
+        miRespuesta = ex.getMessage();
+        System.out.println("Ocurrió un error en eliminarProducto: " + ex.getMessage());
+    } finally {
+        try {
+            if (sentencia != null) sentencia.close();
+            if (nuevaCon != null) nuevaCon.close();
+        } catch (Exception e) {
+            System.out.println("Error cerrando recursos: " + e.getMessage());
+        }
+    }
+    return miRespuesta;
+}
+
+}
